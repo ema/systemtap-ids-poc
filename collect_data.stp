@@ -2,37 +2,37 @@ global groups, statistics
 
 // define 4 groups of interesting events: networking, io, process and portscan
 probe group.networking = syscall.socket, syscall.socketpair 
-{	
-	groupname = "networking" 	
+{   
+    groupname = "networking"    
 }
 
 probe group.io = syscall.open, syscall.close, 
-			syscall.read, syscall.write
-{	
-	groupname = "io" 	
+            syscall.read, syscall.write
+{   
+    groupname = "io"    
 }
 
 probe group.process = syscall.fork, syscall.execve
-{	
-	groupname = "process"	
+{   
+    groupname = "process"   
 }
 
 probe group.portscan = portscan.tcpconnect, portscan.nullfinxmas
 {
-	groupname = "portscan"
+    groupname = "portscan"
 }
 
 // keep track of events
 probe group.* {
-	groups[groupname]++
+    groups[groupname]++
 }
 
 // update statistics every second
 probe timer.ms(1000) {
-	foreach (eg in groups) 
-		statistics[eg] <<< groups[eg]
+    foreach (eg in groups) 
+        statistics[eg] <<< groups[eg]
 
-	delete groups
+    delete groups
 }
 
 function print_avg(groupname) {
@@ -46,5 +46,5 @@ probe timer.ms(10000)
                                 print_avg("process"),
                                 print_avg("io"),
                                 print_avg("portscan"));
-	delete statistics
+    delete statistics
 }
