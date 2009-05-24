@@ -1,0 +1,44 @@
+probe group.networking = syscall.socket, syscall.socketpair 
+{	
+	groupname = "networking" 	
+}
+
+probe group.io = syscall.open, syscall.close, 
+			syscall.read, syscall.write
+{	
+	groupname = "io" 	
+}
+
+probe group.process = syscall.fork, syscall.execve
+{	
+	groupname = "process"	
+}
+
+probe group.portscan = portscan.tcpconnect, portscan.nullfinxmas
+{
+	groupname = "portscan"
+}
+
+global groups
+probe group.* {
+	groups[groupname]++
+}
+
+global statistics
+probe timer.ms(1000) {
+	foreach (eg in groups) {
+		statistics[eg] <<< groups[eg]
+	}
+	delete groups
+}
+
+probe end
+{
+	printf("\n*** Statistics so far ****\n");
+
+	foreach (eg in statistics) {
+		printf("%s avg=%d count=%d:\n", eg, @avg(statistics[eg]), 
+						    @count(statistics[eg]));
+		print(@hist_log(statistics[eg]));
+	}
+}

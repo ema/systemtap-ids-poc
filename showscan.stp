@@ -1,0 +1,11 @@
+global shown
+probe portscan.nullfinxmas, portscan.tcpconnect {
+    key = sprintf("%s %s %s", name, saddr, daddr)
+    now = gettimeofday_s()
+
+    if ([key] in shown && now - shown[key] < 3)
+        next;
+
+    printf("%s scan from %s to %s\n", name, saddr, daddr);
+    shown[key] = now
+}

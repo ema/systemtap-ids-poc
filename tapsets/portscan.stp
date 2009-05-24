@@ -1,0 +1,54 @@
+/* NULL, FIN and XMAS scans are easy to catch */
+probe portscan.nullfinxmas = tcp.receive {
+    name = ""
+
+    if (fin && psh && urg) name = "XMAS";
+
+    if (!psh && !urg && !syn && !rst && !ack) 
+        name = fin ? "FIN" : "NULL";
+
+    if (name == "") next;
+}
+
+function __tcp_payload_len:long (skb) {
+    tcphdr = __get_skb_tcphdr(skb)
+    return @cast(skb, "sk_buff")->len - @cast(tcphdr, "tcphdr")->doff * 4
+}
+
+function __tcp_sockstr:string (skb) {
+    tcphdr = __get_skb_tcphdr(skb)
+    dport = __tcp_skb_dport(tcphdr)
+    sport = __tcp_skb_sport(tcphdr)
+
+    iphdr = __get_skb_iphdr(skb)
+    saddr = ip_ntop(__ip_skb_saddr(iphdr))
+    daddr = ip_ntop(__ip_skb_daddr(iphdr))
+    
+    return sprintf("%s:%d %s:%d", saddr, sport, daddr, dport);
+}
+
+global sockets
+probe kernel.function("tcp_v4_syn_recv_sock") {
+    sockets[__tcp_sockstr($skb)] = __tcp_payload_len($skb)
+}
+
+probe portscan.tcpconnect = tcp.receive {
+    sockstr = __tcp_sockstr($skb)
+    if (!([sockstr] in sockets))
+        next;
+
+    sockets[sockstr] += __tcp_payload_len($skb)
+
+    if (sockets[sockstr] > 0) {
+        /* some data has actually been sent on this socket */
+        delete sockets[sockstr]
+        next;
+    }
+
+    if (ack && rst) {
+        name = "TCP Connect"
+        delete sockets[sockstr]
+    }
+    else 
+        next;
+}
