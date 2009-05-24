@@ -1,5 +1,6 @@
-// define 4 groups of interesting events: networking, io, process and portscan
+global groups, statistics
 
+// define 4 groups of interesting events: networking, io, process and portscan
 probe group.networking = syscall.socket, syscall.socketpair 
 {	
 	groupname = "networking" 	
@@ -22,28 +23,28 @@ probe group.portscan = portscan.tcpconnect, portscan.nullfinxmas
 }
 
 // keep track of events
-global groups
 probe group.* {
 	groups[groupname]++
 }
 
 // update statistics every second
-global statistics
 probe timer.ms(1000) {
-	foreach (eg in groups) {
+	foreach (eg in groups) 
 		statistics[eg] <<< groups[eg]
-	}
+
 	delete groups
 }
 
-probe end
+function print_avg(groupname) {
+    return (groupname in statistics) ? @avg(statistics[groupname]) : 0;
+}
+
+// every 10 seconds print average values
+probe timer.ms(10000)
 {
-	printf("\n*** Statistics so far ****\n");
-
-	foreach (eg in statistics) {
-		printf("%s avg=%d count=%d sum=%d:\n", eg, 
-            @avg(statistics[eg]), @count(statistics[eg]), @sum(statistics[eg]));
-
-		print(@hist_log(statistics[eg]));
-	}
+    printf("%5d %5d %5d %5d\n", print_avg("networking"),
+                                print_avg("process"),
+                                print_avg("io"),
+                                print_avg("portscan"));
+	delete statistics
 }
