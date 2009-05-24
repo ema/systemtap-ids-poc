@@ -1,3 +1,14 @@
+// Portscan tapset
+//
+// Copyright (C) 2009 Emanuele Rocca
+
+// This file is free software.  You can redistribute it and/or modify it under
+// the terms of the GNU General Public License (GPL); either version 2, or (at
+// your option) any later version.
+// <tapsetdescription>
+// This family of probe points allows to identify possible network portscans. 
+// </tapsetdescription>
+
 /* NULL, FIN and XMAS scans are easy to catch */
 probe portscan.nullfinxmas = tcp.receive {
     name = ""

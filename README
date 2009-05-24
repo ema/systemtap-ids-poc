@@ -1,0 +1,7 @@
+showscan.stp is an example of usage of the portscan tapset available in the
+tapsets/ directory. 
+
+Be sure to add tapsets/ to the tapset search directory, for example with the -I
+option:
+
+$ stap -v -I tapsets/ showscan.stp
