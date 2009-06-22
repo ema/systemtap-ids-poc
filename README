@@ -1,5 +1,12 @@
-showscan.stp is an example of usage of the portscan tapset available in the
-tapsets/ directory. 
+This project tries to show a systemtap usage scenario a bit different from
+usual: monitoring a system status to identify possible break-in attempts,
+either detecting incoming portscans and via anomaly analysis.
+
+A tapset for detecting incoming portscans is available in the tapsets/
+directory; for an example of its usage see showscan.stp.
+
+Another script, collect_data.stp, allows to group events into different
+categories and can be used to gather data to be eventually analyzed.
 
 Be sure to add tapsets/ to the tapset search directory, for example with the -I
 option:
