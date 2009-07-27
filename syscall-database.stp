@@ -1,0 +1,15 @@
+global sequences[50000]
+
+probe syscallseq {
+    if ([exec,sequence] in sequences) {
+        next;
+    }
+
+    sequences[exec,sequence] = 1
+    
+    printf("%s: %s\n", exec, sequence)
+}
+
+probe timer.s(600) {
+    exit()
+}

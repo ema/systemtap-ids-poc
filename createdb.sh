@@ -1,3 +1,3 @@
 #!/bin/sh
 
-stap syscall-sequence.stp | ./builddb.py 
+staprun syscalldatabase.ko > /tmp/syscalls.db

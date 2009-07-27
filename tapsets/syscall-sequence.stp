@@ -1,0 +1,26 @@
+global k = 5
+
+global values
+global occurs
+
+probe syscallseq = syscall.*.return {
+    exec = execname()
+
+    if (exec == "stap" || exec == "stapio")
+        next;
+
+    values[exec,occurs[exec]] = name
+    occurs[exec]++
+
+    if (occurs[exec] < k) 
+        next;
+
+    sequence = values[exec,0]
+
+    for (i=1; i < k; i++) {
+        sequence .= " " . values[exec,i]
+        values[exec,i-1] = values[exec,i]
+    }
+
+    occurs[exec]--
+}
