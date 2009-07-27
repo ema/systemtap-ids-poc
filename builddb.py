@@ -12,10 +12,10 @@ for sequence in sys.stdin.readlines():
 
     execname, calls = sequence[0], tuple(sequence[1:])
     
-    if execname not in executables:
-        executables[execname] = set([calls])
-    else:
+    if execname in executables:
         executables[execname].add(calls)
+    else:
+        executables[execname] = set([ calls ])
 
 dbf = open(FILENAME, 'wb')
 cPickle.dump(executables, dbf)

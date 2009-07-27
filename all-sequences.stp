@@ -3,7 +3,7 @@ global k = 5
 global values
 global occurs
 
-probe syscall.* {
+probe syscall.*.return {
     if (execname() == "stap" || execname() == "stapio" || execname() == "builddb.py")
         next;
 
