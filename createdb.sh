@@ -1,3 +1,3 @@
 #!/bin/sh
 
-staprun syscalldatabase.ko > /tmp/syscalls.db
+nice -n 19 staprun allsequences.ko | nice -n 19 python -u builddb.py 

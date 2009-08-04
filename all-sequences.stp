@@ -22,7 +22,3 @@ probe syscall.*.return {
         occurs[execname()]--
     }
 }
-
-probe timer.s(600) {
-    exit()
-}
