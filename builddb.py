@@ -5,20 +5,13 @@ FILENAME = "/tmp/ids.db"
 import sys
 import cPickle
 
-executables = {}
+from reader import SetSyscallDataReader
 
-for sequence in sys.stdin.readlines():
-    sequence = sequence.split()
-
-    execname, calls = sequence[0], tuple(sequence[1:])
-    
-    if execname in executables:
-        executables[execname].add(calls)
-    else:
-        executables[execname] = set([ calls ])
+data = SetSyscallDataReader(input=sys.stdin)
+executables = data.executables
 
 dbf = open(FILENAME, 'wb')
-cPickle.dump(executables, dbf)
+cPickle.dump(data, dbf)
 dbf.close()
 
 print "Database built into", FILENAME
