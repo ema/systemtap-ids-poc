@@ -1,19 +1,24 @@
 import sys
+import time
+
 import seqtree
 
 class SyscallDataReader(object):
 
     def __init__(self, input=sys.stdin):
         self.executables = {}
+        self.starting = time.time()
         
         while True:
             # Not using readlines() to allow unbuffered input
             try:
                 sequence = input.readline()
             except KeyboardInterrupt:
+                self.ending = time.time()
                 break
 
             if not sequence:
+                self.ending = time.time()
                 break
 
             sequence = sequence.split()
