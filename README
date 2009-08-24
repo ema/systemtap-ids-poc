@@ -1,14 +1,43 @@
-This project tries to show a systemtap usage scenario a bit different from the
+This project tries to show a SystemTap usage scenario a bit different from the
 usual: monitoring a system status to identify possible break-in attempts,
-either detecting incoming portscans and via anomaly analysis.
+either detecting incoming portscans using a signature-like approach and via
+analysis of anomalous sequences of system calls.
 
+Portscan detection
+------------------
 A tapset for detecting incoming portscans is available in the tapsets/
 directory; for an example of its usage see showscan.stp.
-
-Another script, collect_data.stp, allows grouping events into different
-categories and can be used to gather data to be eventually analyzed.
 
 Be sure to add tapsets/ to the tapset search directory, for example with the -I
 option:
 
 $ stap -v -I tapsets/ showscan.stp
+
+Anomaly based intrusion detection
+---------------------------------
+A proof-of-concept anomaly based intrusion detection system has been developed.
+
+1) The IDS needs to learn sequences of system calls that it should consider
+   normal. To do that, simply run createdb.sh, which uses the all-sequences.stp
+   SystemTap script and builddb.py to create a database modeling normal behaviour:
+
+   $ ./createdb.sh
+
+   Gathered data will be saved under /var/tmp/ids.db by default. This location can
+   be changed editing the configuration file config.py.
+
+   Ideally, the training phase should last at least a couple of hours, and all the
+   common usage scenario should be reproduced. For example, for desktop systems,
+   the training phase could consist of visiting some of the most commonly
+   visited web sites, sending and receiving e-mails, watching a movie and
+   playing some audio files.
+
+   The database creation can be stopped at any time hitting CTRL+C; some
+   information about the database itself can be obtained with the script
+   dbinfo.py.
+
+2) Once the database is ready, the actual system monitoring can be started running
+   runtime.sh, which uses the aformentioned all-sequences.stp and builddb.py to
+   identify potentially anomalous behaviour:
+
+   $ ./runtime.sh

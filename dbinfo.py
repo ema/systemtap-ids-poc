@@ -1,13 +1,13 @@
 #!/usr/bin/python
 
-FILENAME = "/tmp/ids.db"
-
 import os
 import cPickle
 
-print "Database size:", os.stat(FILENAME).st_size / 1024, "KB\n"
+import config
 
-dbf = open(FILENAME, 'r')
+print "Database size:", os.stat(config.FILENAME).st_size / 1024, "KB\n"
+
+dbf = open(config.FILENAME, 'r')
 reader = cPickle.loads(dbf.read())
 dbf.close()
 

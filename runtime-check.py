@@ -1,11 +1,11 @@
 #!/usr/bin/python
 
-FILENAME = "/tmp/ids.db"
-
 import sys
 import cPickle
 
-dbf = open(FILENAME, 'r')
+import config
+
+dbf = open(config.FILENAME, 'r')
 reader = cPickle.loads(dbf.read())
 dbf.close()
 
