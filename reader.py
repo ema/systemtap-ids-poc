@@ -5,8 +5,12 @@ import seqtree
 
 class SyscallDataReader(object):
 
-    def __init__(self, input=sys.stdin):
-        self.executables = {}
+    def __init__(self, input=sys.stdin, data_to_merge=None):
+        if data_to_merge is not None:
+            self.executables = data_to_merge
+        else:
+            self.executables = {}
+
         self.starting = time.time()
         
         while True:
