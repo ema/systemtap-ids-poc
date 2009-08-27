@@ -29,11 +29,13 @@ def check_sequence(reader, execname, sequence):
     known_seqs = tuple(reader.executables[execname])
 
     distances = [ distance(sequence, seq) for seq in known_seqs ]
-    
-    index_of_min = distances.index(min(distances))
-    min_distance = known_seqs[index_of_min]
 
-    print min_distance, execname, calls
+    min_distance = min(distances)
+
+    similar_seq = known_seqs[distances.index(min_distance)]
+
+    if min_distance > 2:
+        print min_distance, execname, similar_seq, " != ", calls
 
 if __name__ == "__main__":
     reader = dbaccess.getdata()
