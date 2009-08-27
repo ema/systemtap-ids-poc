@@ -1,15 +1,13 @@
 #!/usr/bin/python
 
 import os
-import cPickle
 
 import config
+import dbaccess
 
 print "Database size:", os.stat(config.FILENAME).st_size / 1024, "KB\n"
 
-dbf = open(config.FILENAME, 'r')
-reader = cPickle.loads(dbf.read())
-dbf.close()
+reader = dbaccess.getdata()
 
 execnames = reader.executables.keys()
 print len(execnames), "executables\n"

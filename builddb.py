@@ -2,10 +2,10 @@
 
 import os
 import sys
-import cPickle
 
 from reader import SetSyscallDataReader
 import config
+import dbaccess
 
 msg = "%s database. Stop at any time with CTRL+C"
 
@@ -15,9 +15,7 @@ if not os.path.isfile(config.FILENAME):
 
 else:
     print "Loading old data...",
-    dbf = open(config.FILENAME, 'r')
-    reader = cPickle.loads(dbf.read())
-    dbf.close()
+    reader = dbaccess.getdata()
     print "done"
 
     print msg % "Updating"
@@ -25,15 +23,11 @@ else:
     data = SetSyscallDataReader(input=sys.stdin, 
         data_to_merge=reader.executables)
 
-executables = data.executables
-
-dbf = open(config.FILENAME, 'wb')
-cPickle.dump(data, dbf)
-dbf.close()
+dbaccess.putdata(data)
 
 print "Database built into", config.FILENAME
 
 print "Unique syscalls sequences per executable name:"
 
-for execname in executables:
-    print execname, len(executables[execname])
+for execname in data.executables:
+    print execname, len(data.executables[execname])
