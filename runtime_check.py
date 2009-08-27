@@ -1,9 +1,7 @@
 #!/usr/bin/python
 
 import sys
-import cPickle
 
-import config
 import dbaccess
 
 def distance(seq1, seq2):
@@ -24,6 +22,19 @@ def distance(seq1, seq2):
 
     return mismatches
 
+def check_sequence(reader, execname, sequence):
+    if execname not in reader.executables or reader.knownseq(execname, calls):
+        return
+
+    known_seqs = tuple(reader.executables[execname])
+
+    distances = [ distance(sequence, seq) for seq in known_seqs ]
+    
+    index_of_min = distances.index(min(distances))
+    min_distance = known_seqs[index_of_min]
+
+    print min_distance, execname, calls
+
 if __name__ == "__main__":
     reader = dbaccess.getdata()
 
@@ -35,9 +46,4 @@ if __name__ == "__main__":
         sequence = sequence.split()
 
         execname, calls = sequence[0], tuple(sequence[1:])
-
-        if execname not in reader.executables:
-            continue
-
-        if not reader.knownseq(execname, calls):
-            print execname, calls
+        check_sequence(reader, execname, calls)
