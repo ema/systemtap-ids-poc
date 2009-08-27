@@ -4,7 +4,7 @@ global values
 global occurs
 
 probe syscall.*.return {
-    if (execname() == "stap" || execname() == "stapio" || execname() == "builddb.py")
+    if (execname() == "stap" || execname() == "stapio" || execname() == "python")
         next;
 
     values[execname(),occurs[execname()]] = name

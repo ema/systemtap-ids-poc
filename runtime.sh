@@ -1,3 +1,3 @@
 #!/bin/sh
 
-nice -n 19 staprun allsequences.ko | nice -n 19 python -u runtime_check.py
+nice -n 19 staprun allsequences.ko | nice -n 19 python runtime_check.py
