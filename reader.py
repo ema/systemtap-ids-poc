@@ -12,14 +12,19 @@ class SyscallDataReader(object):
             self.executables = {}
 
         self.starting = time.time()
+        self.input = input
         
+        try:
+            self.go()
+        except KeyboardInterrupt:
+            print "Done"
+        
+        self.ending = time.time()
+
+    def go(self):
         while True:
             # Not using readlines() to allow unbuffered input
-            try:
-                sequence = input.readline()
-            except KeyboardInterrupt:
-                self.ending = time.time()
-                break
+            sequence = self.input.readline()
 
             if not sequence:
                 self.ending = time.time()

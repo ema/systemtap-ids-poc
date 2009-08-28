@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-import os
 import sys
 
 from reader import SetSyscallDataReader
@@ -9,7 +8,7 @@ import dbaccess
 
 msg = "%s database. Stop at any time with CTRL+C"
 
-if not os.path.isfile(config.FILENAME):
+if not dbaccess.dbexists():
     print msg % "Creating"
     data = SetSyscallDataReader(input=sys.stdin)
 
