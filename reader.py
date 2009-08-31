@@ -3,6 +3,12 @@ import time
 
 import seqtree
 
+def line2data(input_line):
+    input_line = input_line.split()
+    # eg: Xorg 0 select clock_gettime setitimer read mmap2
+    (execname, uid), calls = input_line[:2], tuple(input_line[2:])
+    return execname, uid, calls
+
 class SyscallDataReader(object):
 
     def __init__(self, input=sys.stdin, data_to_merge=None):
@@ -24,15 +30,13 @@ class SyscallDataReader(object):
     def go(self):
         while True:
             # Not using readlines() to allow unbuffered input
-            sequence = self.input.readline()
+            input_line = self.input.readline()
 
-            if not sequence:
+            if not input_line:
                 self.ending = time.time()
                 break
 
-            sequence = sequence.split()
-            execname, calls = sequence[0], tuple(sequence[1:])
-
+            execname, uid, calls = line2data(input_line)
             self.addseq(execname, calls)
 
     def addseq(self, execname, calls):

@@ -3,6 +3,7 @@
 import sys
 
 import config
+import reader
 import dbaccess
 
 def distance(seq1, seq2):
@@ -39,14 +40,12 @@ def check_sequence(reader, execname, sequence):
         print min_distance, execname, similar_seq, " != ", calls
 
 if __name__ == "__main__":
-    reader = dbaccess.getdata()
+    data = dbaccess.getdata()
 
     while True:
         sequence = sys.stdin.readline()
         if not sequence:
             break
 
-        sequence = sequence.split()
-
-        execname, calls = sequence[0], tuple(sequence[1:])
-        check_sequence(reader, execname, calls)
+        execname, uid, calls = reader.line2data(sequence)
+        check_sequence(data, execname, calls)
