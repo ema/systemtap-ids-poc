@@ -2,6 +2,7 @@
 
 import sys
 
+import config
 import dbaccess
 
 def distance(seq1, seq2):
@@ -34,7 +35,7 @@ def check_sequence(reader, execname, sequence):
 
     similar_seq = known_seqs[distances.index(min_distance)]
 
-    if min_distance > 2:
+    if min_distance > config.ALLOWED_MISMATCHES:
         print min_distance, execname, similar_seq, " != ", calls
 
 if __name__ == "__main__":
