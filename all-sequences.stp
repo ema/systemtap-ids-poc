@@ -1,4 +1,4 @@
-global k = 5
+// The only command line argument of this script, $1, is the sequence length
 
 global values
 global occurs
@@ -12,10 +12,10 @@ probe syscall.*.return {
     values[exec,occurs[exec]] = name
     occurs[exec]++
 
-    if (occurs[exec] == k) {
+    if (occurs[exec] == $1) {
         printf("%s %d", exec, uid())
 
-        for (i=0; i < k; i++) {
+        for (i=0; i < $1; i++) {
             printf(" %s", values[exec,i])
             values[exec,i] = values[exec,i+1]
         }

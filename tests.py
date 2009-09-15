@@ -5,6 +5,7 @@ import StringIO
 
 from reader import TreeSyscallDataReader, SetSyscallDataReader
 import dbaccess
+import config
 
 def _xcombinations(items, n):
     if n == 0: 
@@ -20,12 +21,12 @@ def _testfd():
         'recvfrom', 'recv', 'rt_sigprocmask', 'time' 'stat'
     ]
 
-    sequences = [ w for w in _xcombinations(syscalls, 5) ]
+    sequences = [ w for w in _xcombinations(syscalls, config.SEQUENCE_LENGTHS) ]
 
     testfd = StringIO.StringIO()
     for execname in 'firefox', 'syslogd':
         for seq in sequences:
-            testfd.write("%s %s\n" % (execname, " ".join(seq)))
+            testfd.write("%s 1000 %s\n" % (execname, " ".join(seq)))
 
     testfd.seek(0)
     return testfd
@@ -93,7 +94,7 @@ class TestDbAccess(unittest.TestCase):
 
         for sequences in data.executables.values():
             for seq in sequences:
-                self.assertEquals(len(seq), 5)
+                self.assertEquals(len(seq), config.SEQUENCE_LENGTHS)
 
     def test_02_putdata(self):
         # fail if fake executable is present BEFORE putdata
