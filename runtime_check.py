@@ -42,6 +42,8 @@ def check_sequence(reader, execname, sequence):
 if __name__ == "__main__":
     data = dbaccess.getdata()
 
+    dbaccess.check_seq_length_consistency(data.sequence_lengths)
+
     while True:
         sequence = sys.stdin.readline()
         if not sequence:

@@ -17,6 +17,8 @@ else:
     reader = dbaccess.getdata()
     print "done"
 
+    dbaccess.check_seq_length_consistency(reader.sequence_lengths)
+
     print msg % "Updating"
 
     data = SetSyscallDataReader(input=sys.stdin, 

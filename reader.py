@@ -1,6 +1,7 @@
 import sys
 import time
 
+import config
 import seqtree
 
 def line2data(input_line):
@@ -19,6 +20,8 @@ class SyscallDataReader(object):
 
         self.starting = time.time()
         self.input = input
+
+        self.sequence_lengths = config.SEQUENCE_LENGTHS
         
         try:
             self.go()

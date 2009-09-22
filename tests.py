@@ -34,13 +34,18 @@ def _testfd():
 class TestReader(unittest.TestCase):
     classname = None
 
-    known_seq = {
-        #'firefox': ('futex', 'gettimeofday', 'futex', 'write', 'gettimeofday' ),
-        'syslogd': ('timestat', 'rt_sigprocmask', 'recvfrom', 'futex', 'write'),
-    }
+    def __gen_sequence_from_seed(self, seed):
+        # seed is a tuple of syscalls
+        # eg: ('futex', 'gettimeofday', 'write', 'time' 'stat' )
+        return tuple([ seed[iteration % len(seed) ] 
+            for iteration in range(config.SEQUENCE_LENGTHS) ])
 
     def setUp(self):
         self.reader = self.classname(_testfd())
+        self.known_seq = {}
+
+        for executable in 'firefox', 'syslogd':
+            self.known_seq[executable] = tuple(self.reader.executables[executable])[0]
 
     def testKnownSeq(self):
         for execname, seq in self.known_seq.items():
@@ -48,9 +53,11 @@ class TestReader(unittest.TestCase):
 
     def testAddSeq(self):
         execname = 'mutt'
-        sequence = ('futex', 'gettimeofday', 'write', 'time' 'stat')
+        sequence = self.__gen_sequence_from_seed(
+            ('futex', 'gettimeofday', 'write', 'time' 'stat' ))
+        
         self.reader.addseq(execname, sequence)
-
+    """
     def testActualData(self):
         try:
             self.reader = self.classname(open("/var/tmp/rawdata.allsequences"))
@@ -79,6 +86,7 @@ class TestReader(unittest.TestCase):
 
         t = timeit.Timer(unknown)
         print t.timeit()
+    """
 
 class TestTreeSyscallDataReader(TestReader):
     classname = TreeSyscallDataReader
