@@ -34,7 +34,7 @@ Your old database has been created with a sequence length=%s, but your current
 configuration uses sequence length=%s.
 Please remove %s and allsequences.ko, then run createdb.sh again.
 
-Otherwise, if you're OK with sequence of length %s, just change the relevant 
+Otherwise, if you're OK with sequences of length %s, just change the relevant
 setting in config.py
 ==============================================================================
 """ % (curlength, config.SEQUENCE_LENGTHS, config.FILENAME, curlength)
