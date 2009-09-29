@@ -6,48 +6,50 @@ import config
 import reader
 import dbaccess
 
-def distance(seq1, seq2):
-    """
-    Return the number of mismatches between two sequences
+from hamming import distance_xrange 
 
-    In [5]: seq1 = ('write', 'gettimeofday', 'ppoll', 'read', 'ioctl')
-       ...: seq2 = ('write', 'gettimeofday', 'ppoll', 'read', 'write')
+DATA = dbaccess.getdata()
 
-    In [6]: runtime_check.distance(seq1, seq2)
-    Out[6]: 1
-    """
-    mismatches = 0
+def min_distance(sequence, known_seqs, distance=distance_xrange):
+    minimum = config.SEQUENCE_LENGTHS
 
-    for idx, elem in enumerate(seq1):
-        if elem != seq2[idx]:
-            mismatches += 1
+    for known in known_seqs:
+        val = distance(known, sequence)
+        if val <= config.ALLOWED_MISMATCHES:
+            return val
 
-    return mismatches
+        if val < minimum:
+            minimum = val
 
-def check_sequence(reader, execname, sequence):
-    if execname not in reader.executables or reader.knownseq(execname, calls):
-        return
+    return minimum
 
-    known_seqs = tuple(reader.executables[execname])
+def check_sequence(input_line):
+    execname, uid, calls = reader.line2data(input_line)
 
-    distances = [ distance(sequence, seq) for seq in known_seqs ]
+    if execname not in DATA.executables:
+        return None, None, None
 
-    min_distance = min(distances)
+    known_seqs = tuple(DATA.executables[execname])
 
-    similar_seq = known_seqs[distances.index(min_distance)]
+    minimum = min_distance(calls, known_seqs)
 
-    if min_distance > config.ALLOWED_MISMATCHES:
-        print min_distance, execname, similar_seq, " != ", calls
+    if minimum > config.ALLOWED_MISMATCHES:
+        return minimum, execname, calls
 
-if __name__ == "__main__":
-    data = dbaccess.getdata()
+    return None, None, None
 
-    dbaccess.check_seq_length_consistency(data.sequence_lengths)
+def main():
+    dbaccess.check_seq_length_consistency(DATA.sequence_lengths)
 
     while True:
         sequence = sys.stdin.readline()
         if not sequence:
             break
 
-        execname, uid, calls = reader.line2data(sequence)
-        check_sequence(data, execname, calls)
+        minimum, execname, calls = check_sequence(sequence)
+
+        if minimum:
+            print minimum, execname, calls
+
+if __name__ == "__main__":
+    main()

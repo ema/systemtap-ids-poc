@@ -4,8 +4,10 @@ import unittest
 import StringIO
 
 from reader import TreeSyscallDataReader, SetSyscallDataReader
-import dbaccess
 import config
+import dbaccess
+import hamming
+import runtime_check
 
 def _xcombinations(items, n):
     if n == 0: 
@@ -31,14 +33,14 @@ def _testfd():
     testfd.seek(0)
     return testfd
 
+def _gen_sequence_from_seed(seed):
+    # seed is a tuple of syscalls
+    # eg: ('futex', 'gettimeofday', 'write', 'time' 'stat' )
+    return tuple([ seed[iteration % len(seed) ] 
+        for iteration in range(config.SEQUENCE_LENGTHS) ])
+
 class TestReader(unittest.TestCase):
     classname = None
-
-    def __gen_sequence_from_seed(self, seed):
-        # seed is a tuple of syscalls
-        # eg: ('futex', 'gettimeofday', 'write', 'time' 'stat' )
-        return tuple([ seed[iteration % len(seed) ] 
-            for iteration in range(config.SEQUENCE_LENGTHS) ])
 
     def setUp(self):
         self.reader = self.classname(_testfd())
@@ -53,40 +55,10 @@ class TestReader(unittest.TestCase):
 
     def testAddSeq(self):
         execname = 'mutt'
-        sequence = self.__gen_sequence_from_seed(
+        sequence = _gen_sequence_from_seed(
             ('futex', 'gettimeofday', 'write', 'time' 'stat' ))
         
         self.reader.addseq(execname, sequence)
-    """
-    def testActualData(self):
-        try:
-            self.reader = self.classname(open("/var/tmp/rawdata.allsequences"))
-        except IOError:
-            print "\nNo raw data available. Skipping testActualData."
-            return
-
-        def known1():
-            sequence = ( "gettimeofday", "read", "gettimeofday", 
-                         "gettimeofday", "gettimeofday" )
-            self.assertTrue(self.reader.knownseq("firefox", sequence))
-
-        def known2():
-            sequence = ("read", "ioctl", "ioctl", "ioctl", "ioctl")
-            self.assertTrue(self.reader.knownseq("pulseaudio", sequence))
-
-        def unknown():
-            sequence = ("read", "ioctl", "b", "c", "d")
-            self.assertFalse(self.reader.knownseq("pulseaudio", sequence))
-
-        t = timeit.Timer(known1)
-        print t.timeit()
-
-        t = timeit.Timer(known2)
-        print t.timeit()
-
-        t = timeit.Timer(unknown)
-        print t.timeit()
-    """
 
 class TestTreeSyscallDataReader(TestReader):
     classname = TreeSyscallDataReader
@@ -126,11 +98,69 @@ class TestDbAccess(unittest.TestCase):
         # fail if fake executable is present after removing it
         data = dbaccess.getdata()
         self.failIf("no such executable" in data.executables)
-        
+
+class TestRuntime(unittest.TestCase):
+    
+    def __min_distance_best_case(self, known_seqs):
+        sequence = known_seqs[0]
+        self.assertEquals(0, runtime_check.min_distance(sequence, known_seqs))
+
+    def __min_distance_worst_case(self, known_seqs):
+        sequence = _gen_sequence_from_seed(( 'wrong', ))
+        self.assertEquals(len(sequence), runtime_check.min_distance(sequence, known_seqs))
+
+    def test_01_min_distance_fake_data(self):
+        known_seqs = [
+            _gen_sequence_from_seed(('futex', 'gettimeofday', 'rite', 'time' 'stat' )),
+            _gen_sequence_from_seed(('futex', 'gettimeofday', 'write', 'time' 'stat' )),
+        ]
+
+        self.__min_distance_best_case(known_seqs)
+
+        sequence = _gen_sequence_from_seed(( 'futex', 'gettimeofday', ))
+        self.assertEquals(2, runtime_check.min_distance(sequence, known_seqs))
+
+        sequence = _gen_sequence_from_seed(( 'gettimeofday', ))
+        self.assertEquals(4, runtime_check.min_distance(sequence, known_seqs))
+
+        self.__min_distance_worst_case(known_seqs)
+
+    def test_02_min_distance_real_data(self):
+        data = dbaccess.getdata()
+        known_seqs = tuple(data.executables[data.executables.keys()[0]])
+
+        self.__min_distance_best_case(known_seqs)
+        self.__min_distance_worst_case(known_seqs)
+
+    def test_03_min_distance_benchmark(self):
+        setup = """
+import runtime_check
+from hamming import distance_comprehension, distance_enumerate, distance_xrange
+import dbaccess
+from tests import _gen_sequence_from_seed
+
+data = dbaccess.getdata()
+known_seqs = tuple(data.executables[data.executables.keys()[0]])
+sequence = _gen_sequence_from_seed(( 'wrong', ))
+"""
+        statement = "runtime_check.min_distance(sequence, known_seqs, %s)"
+
+        values = []
+
+        for func in ("distance_comprehension", "distance_enumerate", "distance_xrange"):
+            t = timeit.Timer(statement % func, setup)
+            values.append(min(t.repeat(3, 100)))
+            
+        print values
+        self.failUnless(values[0] > values[1] > values[2])
+
 if __name__ == "__main__":
-    to_run = (TestSetSyscallDataReader, 
-              TestTreeSyscallDataReader, 
-              TestDbAccess)
+    to_run = (
+        TestSetSyscallDataReader, 
+        TestTreeSyscallDataReader, 
+        TestDbAccess,
+        TestRuntime,
+    )
 
     for what in to_run:
         suite = unittest.TestLoader().loadTestsFromTestCase(what)
