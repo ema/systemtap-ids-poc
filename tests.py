@@ -140,7 +140,7 @@ import dbaccess
 from tests import _gen_sequence_from_seed
 
 data = dbaccess.getdata()
-known_seqs = tuple(data.executables[data.executables.keys()[0]])
+known_seqs = tuple(data.executables['gnome-screensaver'])
 sequence = _gen_sequence_from_seed(( 'wrong', ))
 """
         statement = "runtime_check.min_distance(sequence, known_seqs, %s)"
