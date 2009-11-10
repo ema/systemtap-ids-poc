@@ -32,11 +32,11 @@ A proof-of-concept anomaly based intrusion detection system has been developed.
    visited web sites, sending and receiving e-mails, watching a movie and
    playing some audio files.
 
-   The database creation can be stopped at any time hitting CTRL+C; some
+   Database creation can be stopped at any time hitting CTRL+C; some
    information about the database itself can be obtained with the script
    dbinfo.py.
 
-2) Once the database is ready, the actual system monitoring can be started running
+2) Once the database is ready, actual system monitoring can be started running
    runtime.sh, which uses the aformentioned all-sequences.stp and builddb.py to
    identify potentially anomalous behaviour:
 
